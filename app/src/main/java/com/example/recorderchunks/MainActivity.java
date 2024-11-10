@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                     // Now you can use the 'chunks' list
                     // Example: Log the chunk paths
                     for (String chunk : chunks) {
-                        Log.d("AudioProcessor", "Chunk saved at: " + chunk);
+                        Log.d("AudioProcessor", "Chunk saved at 1: " + chunk);
                     }
 
                     // You can perform further operations with the chunks list here.
