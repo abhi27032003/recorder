@@ -7,23 +7,23 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.google.gson.Gson;
+import com.example.recorderchunks.Event;
 
 import java.util.ArrayList;
+import java.util.List;
 
+// Database Helper Class
 public class DatabaseHelper extends SQLiteOpenHelper {
-
-    private static final String DATABASE_NAME = "recordings.db";
-    private static final int DATABASE_VERSION = 3; // Update to version 3
-    private static final String TABLE_NAME = "recordings";
-
-    private static final String COLUMN_ID = "id";
-    private static final String COLUMN_FILE_PATH = "file_path";
-    private static final String COLUMN_DATE = "date";
-    private static final String COLUMN_TIME = "time";
-    private static final String COLUMN_DURATION = "duration";
-    private static final String COLUMN_UNIQUE_CODE = "unique_code";
-    private static final String COLUMN_AUDIO_CHUNKS = "audio_chunks"; // New column for audio chunks
+    private static final String DATABASE_NAME = "EventDatabase.db";
+    private static final int DATABASE_VERSION = 1;
+    public static final String TABLE_NAME = "events";
+    public static final String COL_ID = "id";
+    public static final String COL_TITLE = "title";
+    public static final String COL_DESCRIPTION = "description";
+    public static final String COL_CREATION_DATE = "creation_date";
+    public static final String COL_CREATION_TIME = "creation_time";
+    public static final String COL_EVENT_DATE = "event_date";
+    public static final String COL_EVENT_TIME = "event_time";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -32,70 +32,63 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + "("
-                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + COLUMN_FILE_PATH + " TEXT,"
-                + COLUMN_DATE + " TEXT,"
-                + COLUMN_TIME + " TEXT,"
-                + COLUMN_DURATION + " INTEGER,"
-                + COLUMN_UNIQUE_CODE + " TEXT,"
-                + COLUMN_AUDIO_CHUNKS + " TEXT" + ")"; // Add the audio_chunks column
+                + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COL_TITLE + " TEXT,"
+                + COL_DESCRIPTION + " TEXT,"
+                + COL_CREATION_DATE + " TEXT,"
+                + COL_CREATION_TIME + " TEXT,"
+                + COL_EVENT_DATE + " TEXT,"
+                + COL_EVENT_TIME + " TEXT" + ")";
         db.execSQL(CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 3) {
-            // Add the audio_chunks column in version 3
-            String ADD_AUDIO_CHUNKS_COLUMN = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMN_AUDIO_CHUNKS + " TEXT";
-            db.execSQL(ADD_AUDIO_CHUNKS_COLUMN);
-        }
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        onCreate(db);
     }
 
-    public void addRecording(Recording recording) {
+    public boolean insertEvent(String title, String description, String creationDate, String creationTime, String eventDate, String eventTime) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_FILE_PATH, recording.getFilePath());
-        values.put(COLUMN_DATE, recording.getDate());
-        values.put(COLUMN_TIME, recording.getTime());
-        values.put(COLUMN_DURATION, recording.getDuration());
-        values.put(COLUMN_UNIQUE_CODE, recording.getUniqueCode());
-
-        // Convert the audioChunks list to a JSON string
-        Gson gson = new Gson();
-        String audioChunksJson = gson.toJson(recording.getAudioChunks());
-        values.put(COLUMN_AUDIO_CHUNKS, audioChunksJson);
-
-        db.insert(TABLE_NAME, null, values);
-        db.close();
+        values.put(COL_TITLE, title);
+        values.put(COL_DESCRIPTION, description);
+        values.put(COL_CREATION_DATE, creationDate);
+        values.put(COL_CREATION_TIME, creationTime);
+        values.put(COL_EVENT_DATE, eventDate);
+        values.put(COL_EVENT_TIME, eventTime);
+        long result = db.insert(TABLE_NAME, null, values);
+        return result != -1;
     }
 
-    @SuppressLint("Range")
-    public ArrayList<Recording> getAllRecordings() {
-        ArrayList<Recording> recordings = new ArrayList<>();
+    // Retrieve all events
+    public List<Event> getAllEvents() {
+        List<Event> eventList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, COL_ID + " DESC");
 
         if (cursor.moveToFirst()) {
             do {
-                String filePath = cursor.getString(cursor.getColumnIndex(COLUMN_FILE_PATH));
-                String date = cursor.getString(cursor.getColumnIndex(COLUMN_DATE));
-                String time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-                long duration = cursor.getLong(cursor.getColumnIndex(COLUMN_DURATION));
-                String uniqueCode = cursor.getString(cursor.getColumnIndex(COLUMN_UNIQUE_CODE));
-                String audioChunksJson = cursor.getString(cursor.getColumnIndex(COLUMN_AUDIO_CHUNKS));
-
-                // Convert the JSON string back into a List of strings
-                Gson gson = new Gson();
-                ArrayList<String> audioChunks = gson.fromJson(audioChunksJson, ArrayList.class);
-
-                Recording recording = new Recording(filePath, date, time, duration, uniqueCode, audioChunks);
-                recordings.add(recording);
+                @SuppressLint("Range") Event event = new Event(
+                        cursor.getInt(cursor.getColumnIndex(COL_ID)),
+                        cursor.getString(cursor.getColumnIndex(COL_TITLE)),
+                        cursor.getString(cursor.getColumnIndex(COL_DESCRIPTION)),
+                        cursor.getString(cursor.getColumnIndex(COL_CREATION_DATE)),
+                        cursor.getString(cursor.getColumnIndex(COL_CREATION_TIME)),
+                        cursor.getString(cursor.getColumnIndex(COL_EVENT_DATE)),
+                        cursor.getString(cursor.getColumnIndex(COL_EVENT_TIME))
+                );
+                eventList.add(event);
             } while (cursor.moveToNext());
         }
-
         cursor.close();
-        db.close();
+        return eventList;
+    }
 
-        return recordings;
+    // Delete an event by ID
+    public boolean deleteEvent(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rowsDeleted = db.delete(TABLE_NAME, COL_ID + " = ?", new String[]{String.valueOf(id)});
+        return rowsDeleted > 0;
     }
 }

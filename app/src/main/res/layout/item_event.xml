@@ -1,0 +1,68 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8sp"
+    android:layout_marginBottom="8dp">
+
+    <!-- Event Title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/event_item_background"
+        android:elevation="2dp"
+        android:layout_marginBottom="8dp">
+        <TextView
+            android:id="@+id/eventTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Title"
+            android:textSize="18sp"
+            android:textColor="#3E4A59"
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <!-- Event Description -->
+        <TextView
+            android:id="@+id/eventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Description"
+            android:textSize="14sp"
+            android:textColor="#6A6A6A"
+            android:paddingBottom="8dp" />
+
+        <!-- Event Creation Date -->
+        <TextView
+            android:id="@+id/eventDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Creation Date: 01 Jan 2024"
+            android:textSize="12sp"
+            android:textColor="#8A8A8A"
+            android:paddingBottom="2dp" />
+
+        <!-- Event Creation Time -->
+        <TextView
+            android:id="@+id/eventTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Creation Time: 10:00 AM"
+            android:textSize="12sp"
+            android:textColor="#8A8A8A"
+            android:paddingBottom="8dp" />
+
+        <!-- Divider Line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+
+    <!-- Container for Delete Button -->
+
+</RelativeLayout>
